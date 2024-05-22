@@ -8,11 +8,22 @@
 import SwiftUI
 
 struct Home: View {
+    var size: CGSize
+    var safeArea: EdgeInsets
+    
+    //view properties
+    @State private var player: AVPlayer? = {
+       
+        return nil
+    }()
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack{
+            let videoPlayerSize: CGSize = .init(width: size.width, height: size.height / 3.5)
+            //custom video player
+        }
     }
 }
 
 #Preview {
-    Home()
+    ContentView()
 }
