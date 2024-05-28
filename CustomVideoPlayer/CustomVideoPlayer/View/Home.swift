@@ -19,7 +19,10 @@ struct Home: View {
         }
         return nil
     }()
+    
     @State private var showPlayerControls: Bool = false
+    @State private var isPlaying: Bool = false
+    
     var body: some View {
         VStack(spacing: 0){
             let videoPlayerSize: CGSize = .init(width: size.width, height: size.height / 3.5)
@@ -27,7 +30,20 @@ struct Home: View {
             ZStack {
                 if let player {
                     CustomVideoPlayer(player: player)
+                        .overlay{
+                            Rectangle()
+                                .fill(.black.opacity(0.4))
+                                .opacity(showPlayerControls ? 1 : 0)
+                                .overlay{PlaybackControls()
+                                }
+                        }
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.35)) {
+                                showPlayerControls.toggle()
+                            }
+                        }
                 }
+                    
             }
             .frame(width: videoPlayerSize.width, height: videoPlayerSize.height)
             ScrollView(.vertical, showsIndicators: false) {
@@ -52,6 +68,57 @@ struct Home: View {
             }
         }
         .padding(.top, safeArea.top)
+    }
+    
+    //playback control view
+    @ViewBuilder
+    func PlaybackControls() -> some View {
+        HStack(spacing:25){
+            Button{
+                
+            } label: {
+                Image(systemName: "backward.end.fill")
+                    .font(.title2)
+                    .fontWeight(.ultraLight)
+                    .foregroundStyle(.white)
+                    .padding(15)
+                    .background{
+                        Circle()
+                            .fill(.black.opacity(0.35))
+                    }
+            }
+            Button{
+                
+            } label: {
+                //changing icon based on video status
+                Image(systemName: isPlaying ? "pause:fill" : "play.fill")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+                    .padding(15)
+                    .background{
+                        Circle()
+                            .fill(.black.opacity(0.35))
+                    }
+            }
+            .scaleEffect(1.1)
+            
+            
+            Button{
+                
+            } label: {
+                Image(systemName: "forward.end.fill")
+                    .font(.title2)
+                    .fontWeight(.ultraLight)
+                    .foregroundStyle(.white)
+                    .padding(15)
+                    .background{
+                        Circle()
+                            .fill(.black.opacity(0.35))
+                    }
+            }
+        }
+        .opacity(showPlayerControls ? 1 : 0)
+        .animation(.easeInOut(duration: 0.2), value: showPlayerControls)
     }
 }
 
