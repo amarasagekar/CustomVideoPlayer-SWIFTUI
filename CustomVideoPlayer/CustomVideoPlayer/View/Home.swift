@@ -22,6 +22,12 @@ struct Home: View {
     
     @State private var showPlayerControls: Bool = false
     @State private var isPlaying: Bool = false
+    @State private var timeoutTask: DispatchWorkItem?
+    
+    ///Video seeker properties
+    @GestureState private var isDragging: Bool = false
+    @State private var progress: CGFloat = 0
+    @State private var lastDraggedProgress: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 0){
@@ -41,6 +47,14 @@ struct Home: View {
                             withAnimation(.easeInOut(duration: 0.35)) {
                                 showPlayerControls.toggle()
                             }
+                            
+                            ///Timing out controls, only if the video is Playing
+                            if isPlaying {
+                                timeoutControls()
+                            }
+                        }
+                        .overlay(alignment: .bottom){
+                            VideoSeekerview()
                         }
                 }
                     
@@ -69,8 +83,14 @@ struct Home: View {
         }
         .padding(.top, safeArea.top)
     }
-    
-    //playback control view
+    /// Video seekar view
+    @ViewBuilder
+    func VideoSeekerview()-> some View{
+        ZStack{
+            9:57
+        }
+    }
+    ///playback control view
     @ViewBuilder
     func PlaybackControls() -> some View {
         HStack(spacing:25){
@@ -87,8 +107,26 @@ struct Home: View {
                             .fill(.black.opacity(0.35))
                     }
             }
+            ///Disabling button
+            .disabled(true)
+            .opacity(0.6)
+            
             Button{
+                /// Changing the video status to Play/Pause based on user input
+                if isPlaying{
+                    player?.pause()
+                    /// cancling timeout task when the video is paused
+                    if let timeoutTask {
+                        timeoutTask.cancel()
+                    }
+                }else{
+                    player?.play()
+                    timeoutControls()
+                }
                 
+                withAnimation(.easeInOut(duration: 0.2)){
+                    isPlaying.toggle()
+                }
             } label: {
                 //changing icon based on video status
                 Image(systemName: isPlaying ? "pause:fill" : "play.fill")
@@ -116,9 +154,32 @@ struct Home: View {
                             .fill(.black.opacity(0.35))
                     }
             }
+            ///Disabling button
+            .disabled(true)
+            .opacity(0.6)
         }
         .opacity(showPlayerControls ? 1 : 0)
         .animation(.easeInOut(duration: 0.2), value: showPlayerControls)
+    }
+    
+    ///Timing out play back controls
+    /// After some 2-5 seconds
+    func timeoutControls(){
+        ///cancling already pending timeout task
+        if let timeoutTask{
+            timeoutTask.cancel()
+        }
+        
+        timeoutTask = .init(block: {
+            withAnimation (.easeInOut(duration: 0.35)) {
+                showPlayerControls = false
+            }
+        })
+        
+        ///scheduling task
+        if let timeoutTask {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: timeoutTask)
+        }
     }
 }
 
