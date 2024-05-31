@@ -23,9 +23,10 @@ struct Home: View {
     @State private var showPlayerControls: Bool = false
     @State private var isPlaying: Bool = false
     @State private var timeoutTask: DispatchWorkItem?
-    
+    @State private var isFinishedPlaying: Bool = false
     ///Video seeker properties
     @GestureState private var isDragging: Bool = false
+    @State private var isSeeking: Bool = false
     @State private var progress: CGFloat = 0
     @State private var lastDraggedProgress: CGFloat = 0
     
@@ -39,7 +40,9 @@ struct Home: View {
                         .overlay{
                             Rectangle()
                                 .fill(.black.opacity(0.4))
-                                .opacity(showPlayerControls ? 1 : 0)
+                                .opacity(showPlayerControls || isDragging ? 1 : 0)
+                            /// Animating dragging state
+                                .animation(.easeInOut(duration: 0.35), value: isDragging)
                                 .overlay{PlaybackControls()
                                 }
                         }
@@ -54,7 +57,7 @@ struct Home: View {
                             }
                         }
                         .overlay(alignment: .bottom){
-                            VideoSeekerview()
+                            VideoSeekerview(videoPlayerSize)
                         }
                 }
                     
@@ -82,14 +85,96 @@ struct Home: View {
             }
         }
         .padding(.top, safeArea.top)
+        .onAppear{
+            /// Adding observer to update seeker when the video is playing
+            player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: {time in
+                /// Calculating video progress
+                if let currentPlayerTime = player?.currentItem{
+                    let totalDuration = currentPlayerTime.duration.seconds
+                    guard let currentDuration = player?.currentTime().seconds else { return}
+                    
+                    let calculatedProgress = currentDuration / totalDuration
+                    if !isSeeking{
+                        progress = calculatedProgress
+                        lastDraggedProgress = progress
+                    }
+                    
+                    
+                    if calculatedProgress == 1 {
+                        /// Video finished playing
+                        isFinishedPlaying = true
+                        isPlaying = false
+                    }
+                }
+            })
+        }
     }
     /// Video seekar view
     @ViewBuilder
-    func VideoSeekerview()-> some View{
-        ZStack{
-            9:57
+    func VideoSeekerview(_ videoSize: CGSize)-> some View{
+        ZStack(alignment:.leading){
+            Rectangle()
+                .fill(.gray)
+            
+            Rectangle()
+                .fill(.red)
+                .frame(width: max(size.width * progress, 0))
+        }
+        .frame(height: 3)
+        .overlay(alignment: .leading) {
+            Circle()
+                .fill(.red)
+                .frame(width: 15, height: 15)
+            ///Showing dragg knob only when dragging
+                .scaleEffect(showPlayerControls || isDragging ? 1 : 0.001, anchor: progress * size.width > 15 ? .trailing : .leading)
+                ///For more dragging space
+                .frame(width: 50, height: 50)
+                .contentShape(Rectangle())
+                ///Moving along side with gesture progress
+                .offset(x: size.width * progress)
+                .gesture(
+                    DragGesture()
+                        .updating($isDragging, body: { _, out, _ in
+                            out = true
+                        })
+                        .onChanged({ value in
+                            /// Cancling existing Timeout task
+                            if let timeoutTask {
+                                timeoutTask.cancel()
+                            }
+                            ///Calculating progress
+                            let translationX: CGFloat = value.translation.width
+                            let calculatedProgress = (translationX / videoSize.width) + lastDraggedProgress
+                            
+                            progress = max(min(calculatedProgress, 1), 0)
+                            isSeeking = true
+                        })
+                        .onEnded({ value in
+                            ///Storing last known progress
+                            lastDraggedProgress = progress
+                            ///Seeking video to drgged time
+                            if let currentPlayerItem = player?.currentItem {
+                                let totalDurartion = currentPlayerItem.duration.seconds
+                                
+                                player?.seek(to: .init(seconds: totalDurartion * progress, preferredTimescale: 1))
+                                
+                                ///Re-scheduling Timeout task
+                                if isPlaying {
+                                    timeoutControls()
+                                }
+                                
+                                /// Releasing with slight delay
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+                                    isSeeking = false
+                                }
+                            }
+                        })
+                )
+                .offset(x: progress * videoSize.width > 15 ? -15 : 0)
+                .frame(width: 15, height: 15)
         }
     }
+    
     ///playback control view
     @ViewBuilder
     func PlaybackControls() -> some View {
@@ -112,6 +197,15 @@ struct Home: View {
             .opacity(0.6)
             
             Button{
+                
+                if isFinishedPlaying {
+                    ///Setting video to start and playing Again
+                    isFinishedPlaying = false
+                    player?.seek(to: .zero)
+                    progress = .zero
+                    lastDraggedProgress = .zero
+                }
+                
                 /// Changing the video status to Play/Pause based on user input
                 if isPlaying{
                     player?.pause()
@@ -128,8 +222,9 @@ struct Home: View {
                     isPlaying.toggle()
                 }
             } label: {
-                //changing icon based on video status
-                Image(systemName: isPlaying ? "pause:fill" : "play.fill")
+                ///changing icon based on video status
+                /// Changing Icon when Video was finishhed  Playing
+                Image(systemName: isFinishedPlaying ? "arrow.clockwise" : (isPlaying ? "pause:fill" : "play.fill"))
                     .font(.title2)
                     .foregroundStyle(.white)
                     .padding(15)
@@ -158,8 +253,9 @@ struct Home: View {
             .disabled(true)
             .opacity(0.6)
         }
-        .opacity(showPlayerControls ? 1 : 0)
-        .animation(.easeInOut(duration: 0.2), value: showPlayerControls)
+        ///Hiding controls while dragging
+        .opacity(showPlayerControls && !isDragging ? 1 : 0)
+        .animation(.easeInOut(duration: 0.2), value: showPlayerControls && !isDragging)
     }
     
     ///Timing out play back controls
