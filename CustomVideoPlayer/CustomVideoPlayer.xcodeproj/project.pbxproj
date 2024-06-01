@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0981A3B12C0B815900EC3873 /* DoubleTapSeek.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0981A3B02C0B815900EC3873 /* DoubleTapSeek.swift */; };
 		098DB6632BFCF6B40016D105 /* CustomVideoPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098DB6622BFCF6B40016D105 /* CustomVideoPlayerApp.swift */; };
 		098DB6652BFCF6B40016D105 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098DB6642BFCF6B40016D105 /* ContentView.swift */; };
 		098DB6672BFCF6B70016D105 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 098DB6662BFCF6B70016D105 /* Assets.xcassets */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0981A3B02C0B815900EC3873 /* DoubleTapSeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleTapSeek.swift; sourceTree = "<group>"; };
 		098DB65F2BFCF6B40016D105 /* CustomVideoPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomVideoPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		098DB6622BFCF6B40016D105 /* CustomVideoPlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomVideoPlayerApp.swift; sourceTree = "<group>"; };
 		098DB6642BFCF6B40016D105 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				098DB6742BFD02A20016D105 /* Home.swift */,
+				0981A3B02C0B815900EC3873 /* DoubleTapSeek.swift */,
 				09CA3F4A2BFE61F600B0C4F6 /* CustomVideoPlayer.swift */,
 			);
 			path = View;
@@ -163,6 +166,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0981A3B12C0B815900EC3873 /* DoubleTapSeek.swift in Sources */,
 				098DB6652BFCF6B40016D105 /* ContentView.swift in Sources */,
 				09CA3F4B2BFE61F600B0C4F6 /* CustomVideoPlayer.swift in Sources */,
 				098DB6752BFD02A20016D105 /* Home.swift in Sources */,

@@ -46,6 +46,16 @@ struct Home: View {
                                 .overlay{PlaybackControls()
                                 }
                         }
+                        .overlay(content: {
+                            HStack(spacing: 60){
+                                DoubleTapSeek{
+                                    
+                                }
+                                DoubleTapSeek(isForward: true){
+                                    
+                                }
+                            }
+                        })
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.35)) {
                                 showPlayerControls.toggle()
