@@ -58,3 +58,4 @@ struct DoubleTapSeek: View {
 #Preview {
     ContentView()
 }
+
