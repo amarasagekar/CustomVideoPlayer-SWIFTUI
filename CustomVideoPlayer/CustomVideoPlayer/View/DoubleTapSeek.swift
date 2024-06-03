@@ -30,7 +30,7 @@ struct DoubleTapSeek: View {
             .overlay {
                 VStack(spacing: 10){
                     HStack(spacing: 0){
-                        ForEach(0...2, id:\.self){index in
+                        ForEach((0...2).reversed(), id:\.self){index in
                             Image(systemName: "arrowtriangle.backward.fill")
                                 .opacity(showArrows[index] ? 1 : 0.2)
                         }
@@ -46,11 +46,26 @@ struct DoubleTapSeek: View {
                 .opacity(isTapped ? 1 : 0)
             }
             .contentShape(Rectangle())
-            .onTapGesture {
+            .onTapGesture (count: 2){
                 withAnimation (.easeInOut(duration: 0.25)){
                     isTapped = true
                     showArrows[0] = true
                 }
+                withAnimation (.easeInOut(duration: 0.2).delay(0.2)){
+                    showArrows[0] = false
+                    showArrows[1] = true
+                }
+                withAnimation (.easeInOut(duration: 0.2).delay(0.35)){
+                    showArrows[1] = false
+                    showArrows[2] = true
+                }
+                withAnimation (.easeInOut(duration: 0.2).delay(0.5)){
+                    showArrows[1] = false
+                    isTapped = false
+                }
+                
+                /// Calling onTap Function After Animation has been initiated
+                onTap()
             }
     }
 }
