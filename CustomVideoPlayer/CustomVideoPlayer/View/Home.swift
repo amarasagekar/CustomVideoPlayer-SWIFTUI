@@ -31,6 +31,9 @@ struct Home: View {
     @State private var lastDraggedProgress: CGFloat = 0
     @State private var isObserverAdded:Bool = false
     
+    /// Video Seeker Thumbnails
+    @State private var thubnailFrame: [UIImage] = []
+    
     var body: some View {
         VStack(spacing: 0){
             let videoPlayerSize: CGSize = .init(width: size.width, height: size.height / 3.5)
@@ -293,6 +296,28 @@ struct Home: View {
         ///scheduling task
         if let timeoutTask {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: timeoutTask)
+        }
+    }
+    
+    /// Genrating Thumbnail frames
+    func generatethumbnailframe(){
+        Task.detached {
+            guard let asset = player?.currentItem?.asset else { return }
+            let generator = AVAssetImageGenerator(asset: asset)
+            generator.appliesPreferredTrackTransform = true
+            ///Min Size
+            generator.maximumSize = .init(width: 250, height: 250)
+            
+            do{
+                let totalDuration = try await asset.load(.duration).seconds
+                /// Frame Timings
+                /// 1/0.1 = 100 (frames)
+                for progress in stride(from: 0, to: 1, by: 0.01){
+                    let time = CMTime(seconds: progress * totalDuration, preferredTimescale: 1)
+                }
+            }catch{
+                print(error.localizedDescription)
+            }
         }
     }
 }
