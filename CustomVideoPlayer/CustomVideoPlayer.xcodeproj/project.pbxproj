@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		092578AD2C39A42D005A696B /* CMTime+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 092578AC2C39A42D005A696B /* CMTime+Extensions.swift */; };
 		0981A3B12C0B815900EC3873 /* DoubleTapSeek.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0981A3B02C0B815900EC3873 /* DoubleTapSeek.swift */; };
 		098DB6632BFCF6B40016D105 /* CustomVideoPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098DB6622BFCF6B40016D105 /* CustomVideoPlayerApp.swift */; };
 		098DB6652BFCF6B40016D105 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098DB6642BFCF6B40016D105 /* ContentView.swift */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		092578AC2C39A42D005A696B /* CMTime+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CMTime+Extensions.swift"; sourceTree = "<group>"; };
 		0981A3B02C0B815900EC3873 /* DoubleTapSeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleTapSeek.swift; sourceTree = "<group>"; };
 		098DB65F2BFCF6B40016D105 /* CustomVideoPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomVideoPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		098DB6622BFCF6B40016D105 /* CustomVideoPlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomVideoPlayerApp.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 		098DB6722BFD02760016D105 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				092578AC2C39A42D005A696B /* CMTime+Extensions.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -166,6 +169,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				092578AD2C39A42D005A696B /* CMTime+Extensions.swift in Sources */,
 				0981A3B12C0B815900EC3873 /* DoubleTapSeek.swift in Sources */,
 				098DB6652BFCF6B40016D105 /* ContentView.swift in Sources */,
 				09CA3F4B2BFE61F600B0C4F6 /* CustomVideoPlayer.swift in Sources */,

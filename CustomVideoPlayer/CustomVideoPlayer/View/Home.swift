@@ -33,7 +33,8 @@ struct Home: View {
     
     /// Video Seeker Thumbnails
     @State private var thubnailFrame: [UIImage] = []
-    
+    @State private var draggingImage: UIImage?
+    @State private var playerStatusobserver: NSKeyValueObservation?
     var body: some View {
         VStack(spacing: 0){
             let videoPlayerSize: CGSize = .init(width: size.width, height: size.height / 3.5)
@@ -75,6 +76,9 @@ struct Home: View {
                                 timeoutControls()
                             }
                         }
+                        .overlay(alignment: .leading, content: {
+                            SeekerThumbnailView(videoPlayerSize)
+                        })
                         .overlay(alignment: .bottom){
                             VideoSeekerview(videoPlayerSize)
                         }
@@ -128,7 +132,53 @@ struct Home: View {
                 }
             })
             isObserverAdded = true
+            
+            /// Before generating thumnails, Check is the video is loaded
+            playerStatusobserver = player?.observe(\.status, options: .new, changeHandler: { player, _ in
+                if player.status == .readyToPlay{
+                    generatethumbnailframe()
+                }
+            })
         }
+        .onDisappear{
+            /// Clearing Observers
+            playerStatusobserver?.invalidate()
+        }
+    }
+    
+    /// Dragging Thumbnail View
+    @ViewBuilder
+    func SeekerThumbnailView(_ videoSize: CGSize) -> some View{
+        let thumbSize : CGSize = .init(width: 175, height: 100)
+        ZStack{
+            
+            if let draggingImage {
+                Image(uiImage: draggingImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: thumbSize.width, height: thumbSize.height)
+                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                    .overlay(alignment: .bottom, content: {
+                        
+                    })
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            .stroke(.white, lineWidth: 2)
+                    }
+            }else{
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .fill(.black)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            .stroke(.white, lineWidth: 2)
+                    }
+            }
+        }
+        .frame(width: thumbSize.width, height: thumbSize.height)
+        .opacity(isDragging ? 1: 0)
+        /// Moving Along side
+        .offset(x: progress * (videoSize.width - thumbSize.width - 20))
+        .offset(x: 10)
     }
     /// Video seekar view
     @ViewBuilder
@@ -169,6 +219,12 @@ struct Home: View {
                             
                             progress = max(min(calculatedProgress, 1), 0)
                             isSeeking = true
+                            
+                            let dragIndex = Int(progress / 0.01)
+                            // Checking if FrameThumbnails Contains the frame
+                            if thubnailFrame.indices.contains(dragIndex){
+                                draggingImage = thubnailFrame[dragIndex]
+                            }
                         })
                         .onEnded({ value in
                             ///Storing last known progress
@@ -310,10 +366,20 @@ struct Home: View {
             
             do{
                 let totalDuration = try await asset.load(.duration).seconds
+                var frameTimes: [CMTime] = []
                 /// Frame Timings
                 /// 1/0.1 = 100 (frames)
                 for progress in stride(from: 0, to: 1, by: 0.01){
                     let time = CMTime(seconds: progress * totalDuration, preferredTimescale: 1)
+                }
+                
+                ///Generating Frame Images
+                for await result in generator.images(for: frameTimes) {
+                    let cgImage = try result.image
+                    // Adding frame Image
+                    await MainActor.run {
+                        thubnailFrame.append(UIImage(cgImage: cgImage))
+                    }
                 }
             }catch{
                 print(error.localizedDescription)
