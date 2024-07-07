@@ -56,13 +56,13 @@ struct Home: View {
                                 DoubleTapSeek{
                                     /// Seeking 15 sec backward
                                     let seconds = player.currentTime().seconds - 15
-                                    player.seek(to: .init(seconds:seconds, preferredTimescale: 1))
+                                    player.seek(to: .init(seconds:seconds, preferredTimescale: 600))
                         
                                 }
                                 DoubleTapSeek(isForward: true){
                                     /// Seeking 15 sec Forward
                                     let seconds = player.currentTime().seconds + 15
-                                    player.seek(to: .init(seconds:seconds, preferredTimescale: 1))
+                                    player.seek(to: .init(seconds:seconds, preferredTimescale: 600))
                                 }
                             }
                         })
@@ -111,7 +111,7 @@ struct Home: View {
         .onAppear{
             guard !isObserverAdded else {return}
             /// Adding observer to update seeker when the video is playing
-            player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 1), queue: .main, using: {time in
+            player?.addPeriodicTimeObserver(forInterval: .init(seconds: 1, preferredTimescale: 600), queue: .main, using: {time in
                 /// Calculating video progress
                 if let currentPlayerTime = player?.currentItem{
                     let totalDuration = currentPlayerTime.duration.seconds
@@ -159,7 +159,13 @@ struct Home: View {
                     .frame(width: thumbSize.width, height: thumbSize.height)
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                     .overlay(alignment: .bottom, content: {
-                        
+                        if let currentItem = player?.currentItem {
+                            Text(CMTime(seconds: progress * currentItem.duration.seconds, preferredTimescale: 600).toTimeString())
+                                .font(.callout)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .offset(y:25)
+                        }
                     })
                     .overlay {
                         RoundedRectangle(cornerRadius: 15, style: .continuous)
@@ -233,7 +239,7 @@ struct Home: View {
                             if let currentPlayerItem = player?.currentItem {
                                 let totalDurartion = currentPlayerItem.duration.seconds
                                 
-                                player?.seek(to: .init(seconds: totalDurartion * progress, preferredTimescale: 1))
+                                player?.seek(to: .init(seconds: totalDurartion * progress, preferredTimescale: 600))
                                 
                                 ///Re-scheduling Timeout task
                                 if isPlaying {
@@ -370,7 +376,7 @@ struct Home: View {
                 /// Frame Timings
                 /// 1/0.1 = 100 (frames)
                 for progress in stride(from: 0, to: 1, by: 0.01){
-                    let time = CMTime(seconds: progress * totalDuration, preferredTimescale: 1)
+                    let time = CMTime(seconds: progress * totalDuration, preferredTimescale: 600)
                 }
                 
                 ///Generating Frame Images
