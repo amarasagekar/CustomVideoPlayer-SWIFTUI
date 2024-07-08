@@ -35,9 +35,14 @@ struct Home: View {
     @State private var thubnailFrame: [UIImage] = []
     @State private var draggingImage: UIImage?
     @State private var playerStatusobserver: NSKeyValueObservation?
+    
+    /// Rotation Properties
+    @State private var isRotated: Bool = false
+    
     var body: some View {
         VStack(spacing: 0){
-            let videoPlayerSize: CGSize = .init(width: size.width, height: size.height / 3.5)
+            /// Swapping Size when rotated
+            let videoPlayerSize: CGSize = .init(width: isRotated ? size.height : size.width, height: isRotated ? size.width : (size.height / 3.5))
             //custom video player
             ZStack {
                 if let player {
@@ -76,16 +81,47 @@ struct Home: View {
                                 timeoutControls()
                             }
                         }
-                        .overlay(alignment: .leading, content: {
+                        .overlay(alignment: .bottomLeading, content: {
                             SeekerThumbnailView(videoPlayerSize)
+                                .offset(y: isRotated ? -85 : 60)
                         })
                         .overlay(alignment: .bottom){
                             VideoSeekerview(videoPlayerSize)
+                                .offset(y: isRotated ? -15 : 0)
                         }
                 }
                     
             }
+            .background(content:{
+                Rectangle()
+                    .fill(.black)
+                    /// Since view is rotated the trailing side is bottom
+                    .padding(.trailing, isRotated ? -safeArea.bottom : 0)
+            })
+            .gesture(
+                DragGesture()
+                    .onEnded({ value in
+                        if -value.translation.height > 100 {
+                            /// Rotate player
+                            withAnimation(.easeInOut(duration: 0.2)){
+                                isRotated = true
+                            }
+                        }else{
+                            /// Go to normal position
+                            withAnimation(.easeInOut(duration: 0.2)){
+                                isRotated = false
+                            }
+                        }
+                    })
+            )
             .frame(width: videoPlayerSize.width, height: videoPlayerSize.height)
+            ///To avoid other view Expansion set its native view height
+            .frame(width: size.width, height: size.height / 3.5, alignment: .bottomLeading)
+            .offset(y: isRotated ? -((size.width / 2) + safeArea.bottom) : 0)
+            .rotationEffect(.init(degrees: isRotated ? 90:0), anchor: .topLeading)
+            ///Making it top view
+            .zIndex(10000)
+            
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 10){
                     ForEach(1...5, id:\.self){index in
@@ -195,7 +231,7 @@ struct Home: View {
             
             Rectangle()
                 .fill(.red)
-                .frame(width: max(size.width * progress, 0))
+                .frame(width: max(videoSize.width * progress, 0))
         }
         .frame(height: 3)
         .overlay(alignment: .leading) {
@@ -203,12 +239,12 @@ struct Home: View {
                 .fill(.red)
                 .frame(width: 15, height: 15)
             ///Showing dragg knob only when dragging
-                .scaleEffect(showPlayerControls || isDragging ? 1 : 0.001, anchor: progress * size.width > 15 ? .trailing : .leading)
+                .scaleEffect(showPlayerControls || isDragging ? 1 : 0.001, anchor: progress * videoSize.width > 15 ? .trailing : .leading)
                 ///For more dragging space
                 .frame(width: 50, height: 50)
                 .contentShape(Rectangle())
                 ///Moving along side with gesture progress
-                .offset(x: size.width * progress)
+                .offset(x: videoSize.width * progress)
                 .gesture(
                     DragGesture()
                         .updating($isDragging, body: { _, out, _ in
